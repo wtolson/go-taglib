@@ -1,3 +1,4 @@
+// Go wrapper for taglib
 package taglib
 
 // #cgo LDFLAGS: -ltag_c
@@ -17,6 +18,8 @@ type File struct {
 	props *C.TagLib_AudioProperties
 }
 
+// Reads and parses a music file. Returns an error if the provided filename is
+// not a valid file.
 func Read(filename string) (*File, error) {
 	cs := C.CString(filename)
 	defer C.free(unsafe.Pointer(cs))
@@ -33,6 +36,7 @@ func Read(filename string) (*File, error) {
 	}, nil
 }
 
+// Close and free the file.
 func (file *File) Close() {
 	C.taglib_file_free(file.fp)
 }
@@ -79,7 +83,8 @@ func (file *File) Track() int {
 
 // Returns the length of the file.
 func (file *File) Length() time.Duration {
-	return time.Duration(C.taglib_audioproperties_length(file.props)) * time.Second
+	length := C.taglib_audioproperties_length(file.props)
+	return time.Duration(length) * time.Second
 }
 
 // Returns the bitrate of the file in kb/s.
