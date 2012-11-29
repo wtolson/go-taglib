@@ -18,6 +18,8 @@ type File struct {
 	props *C.TagLib_AudioProperties
 }
 
+var ErrInvalid = errors.New("invalid file")
+
 // Reads and parses a music file. Returns an error if the provided filename is
 // not a valid file.
 func Read(filename string) (*File, error) {
@@ -25,8 +27,8 @@ func Read(filename string) (*File, error) {
 	defer C.free(unsafe.Pointer(cs))
 
 	fp := C.taglib_file_new(cs)
-	if C.taglib_file_is_valid(fp) == 0 {
-		return nil, errors.New("invalid file")
+	if fp == nil || C.taglib_file_is_valid(fp) == 0 {
+		return nil, ErrInvalid
 	}
 
 	return &File{
@@ -39,6 +41,9 @@ func Read(filename string) (*File, error) {
 // Close and free the file.
 func (file *File) Close() {
 	C.taglib_file_free(file.fp)
+	file.fp = nil
+	file.tag = nil
+	file.props = nil
 }
 
 func convertAndFree(cs *C.char) string {
