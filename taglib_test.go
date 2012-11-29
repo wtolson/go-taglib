@@ -15,6 +15,26 @@ func TestReadNothing(t *testing.T) {
 	if err == nil {
 		t.Fatal("Returned nil err.")
 	}
+
+	if err != ErrInvalid {
+		t.Fatal("Didn't return ErrInvalid")
+	}
+}
+
+func TestReadDirectory(t *testing.T) {
+	file, err := Read("/")
+
+	if file != nil {
+		t.Fatal("Returned non nil file struct.")
+	}
+
+	if err == nil {
+		t.Fatal("Returned nil err.")
+	}
+
+	if err != ErrInvalid {
+		t.Fatal("Didn't return ErrInvalid")
+	}
 }
 
 func TestTagLib(t *testing.T) {
