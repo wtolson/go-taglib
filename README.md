@@ -2,6 +2,7 @@ go-taglib
 =========
 
 Go wrapper for [taglib](http://taglib.github.com/)
+[![Build Status](https://travis-ci.org/wtolson/go-taglib.png)](https://travis-ci.org//wtolson/go-taglib)
 
 Dependencies
 ------------
