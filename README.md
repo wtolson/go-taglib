@@ -15,7 +15,7 @@ in order to compile go-taglib.
 
 ### Ubuntu:
 
-    sudo apt-get install libtag1-dev
+    sudo apt-get install libtagc0-dev
 
 Install
 -------

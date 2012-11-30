@@ -61,7 +61,7 @@ func convertAndFree(cs *C.char) string {
 		return ""
 	}
 
-	defer C.taglib_free(unsafe.Pointer(cs))
+	defer C.free(unsafe.Pointer(cs))
 	return C.GoString(cs)
 }
 
