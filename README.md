@@ -26,4 +26,4 @@ Install
 Documentation
 -------------
 
-Checkout the documentation at http://go.pkgdoc.org/github.com/wtolson/go-taglib
+Checkout the documentation at http://godoc.org/github.com/wtolson/go-taglib
