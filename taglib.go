@@ -160,3 +160,73 @@ func init() {
 
 	C.taglib_set_string_management_enabled(0)
 }
+
+// Saves the \a file to disk.
+func (file *File) Save() bool {
+	glock.Lock()
+	defer glock.Unlock()
+	return C.taglib_file_save(file.fp) == 0
+
+}
+
+// Sets the tag's title.
+func (file *File) SetTitle(s string) {
+	glock.Lock()
+	defer glock.Unlock()
+	cs := C.CString(s)
+	defer C.free(unsafe.Pointer(cs))
+	C.taglib_tag_set_title(file.tag, cs)
+
+}
+
+// Sets the tag's artist.
+func (file *File) SetArtist(s string) {
+	glock.Lock()
+	defer glock.Unlock()
+	cs := C.CString(s)
+	defer C.free(unsafe.Pointer(cs))
+	C.taglib_tag_set_artist(file.tag, cs)
+}
+
+// Sets the tag's album.
+func (file *File) SetAlbum(s string) {
+	glock.Lock()
+	defer glock.Unlock()
+	cs := C.CString(s)
+	defer C.free(unsafe.Pointer(cs))
+	C.taglib_tag_set_album(file.tag, cs)
+}
+
+// Sets the tag's comment.
+func (file *File) SetComment(s string) {
+	glock.Lock()
+	defer glock.Unlock()
+	cs := C.CString(s)
+	defer C.free(unsafe.Pointer(cs))
+	C.taglib_tag_set_comment(file.tag, cs)
+}
+
+// Sets the tag's genre.
+func (file *File) SetGenre(s string) {
+	glock.Lock()
+	defer glock.Unlock()
+	cs := C.CString(s)
+	defer C.free(unsafe.Pointer(cs))
+	C.taglib_tag_set_genre(file.tag, cs)
+}
+
+// Sets the tag's year.  0 indicates that this field should be cleared.
+func (file *File) SetYear(i int) {
+	glock.Lock()
+	defer glock.Unlock()
+	ci := C.uint(i)
+	C.taglib_tag_set_year(file.tag, ci)
+}
+
+// Sets the tag's track number.  0 indicates that this field should be cleared.
+func (file *File) SetTrack(i int) {
+	glock.Lock()
+	defer glock.Unlock()
+	ci := C.uint(i)
+	C.taglib_tag_set_track(file.tag, ci)
+}

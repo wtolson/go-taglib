@@ -1,6 +1,10 @@
 package taglib
 
 import (
+	"io"
+	"io/ioutil"
+	"os"
+	"path"
 	"testing"
 	"time"
 )
@@ -92,4 +96,113 @@ func TestTagLib(t *testing.T) {
 	if channels := file.Channels(); channels != 2 {
 		t.Errorf("Got wrong channels: %d", channels)
 	}
+}
+
+func TestWriteTagLib(t *testing.T) {
+	fileName := "test.mp3"
+	file, err := Read(fileName)
+
+	if err != nil {
+		panic(err)
+		t.Fatalf("Read returned error: %s", err)
+	}
+	tempDir, err := ioutil.TempDir("", "go-taglib-test")
+
+	if err != nil {
+		panic(err)
+		t.Fatalf("Cannot create temporary file for writing tests: %s", err)
+	}
+
+	tempFileName := path.Join(tempDir, "go-taglib-test.mp3")
+
+	defer file.Close()
+	defer os.RemoveAll(tempDir)
+
+	err = cp(tempFileName, fileName)
+
+	if err != nil {
+		panic(err)
+		t.Fatalf("Cannot copy file for writing tests: %s", err)
+	}
+
+	modifiedFile, err := Read(tempFileName)
+	if err != nil {
+		panic(err)
+		t.Fatalf("Read returned error: %s", err)
+	}
+	modifiedFile.SetAlbum(getModifiedString(file.Album()))
+	modifiedFile.SetComment(getModifiedString(file.Comment()))
+	modifiedFile.SetGenre(getModifiedString(file.Genre()))
+	modifiedFile.SetTrack(file.Track() + 1)
+	modifiedFile.SetYear(file.Year() + 1)
+	modifiedFile.SetArtist(getModifiedString(file.Artist()))
+	modifiedFile.SetTitle(getModifiedString(file.Title()))
+	modifiedFile.Save()
+	modifiedFile.Close()
+	//Re-open the modified file
+	modifiedFile, err = Read(tempFileName)
+	if err != nil {
+		panic(err)
+		t.Fatalf("Read returned error: %s", err)
+	}
+
+	// Test the Tags
+	if title := modifiedFile.Title(); title != getModifiedString("The Title") {
+		t.Errorf("Got wrong modified title: %s", title)
+	}
+
+	if artist := modifiedFile.Artist(); artist != getModifiedString("The Artist") {
+		t.Errorf("Got wrong modified artist: %s", artist)
+	}
+
+	if album := modifiedFile.Album(); album != getModifiedString("The Album") {
+		t.Errorf("Got wrong modified album: %s", album)
+	}
+
+	if comment := modifiedFile.Comment(); comment != getModifiedString("A Comment") {
+		t.Errorf("Got wrong modified comment: %s", comment)
+	}
+
+	if genre := modifiedFile.Genre(); genre != getModifiedString("Booty Bass") {
+		t.Errorf("Got wrong modified genre: %s", genre)
+	}
+
+	if year := modifiedFile.Year(); year != getModifiedInt(1942) {
+		t.Errorf("Got wrong modified year: %d", year)
+	}
+
+	if track := modifiedFile.Track(); track != getModifiedInt(42) {
+		t.Errorf("Got wrong modified track: %d", track)
+	}
+}
+
+func checkModified(original string, modified string) bool {
+	return modified == getModifiedString(original)
+}
+
+func getModifiedString(s string) string {
+	return s + " MODIFIED"
+}
+
+func getModifiedInt(i int) int {
+	return i + 1
+}
+
+func cp(dst, src string) error {
+	s, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	// no need to check errors on read only file, we already got everything
+	// we need from the filesystem, so nothing can go wrong now.
+	defer s.Close()
+	d, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(d, s); err != nil {
+		d.Close()
+		return err
+	}
+	return d.Close()
 }
