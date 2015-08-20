@@ -165,7 +165,7 @@ func init() {
 func (file *File) Save() bool {
 	glock.Lock()
 	defer glock.Unlock()
-	return C.taglib_file_save(file.fp) == 0
+	return C.taglib_file_save(file.fp) == 1
 
 }
 
