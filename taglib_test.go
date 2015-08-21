@@ -137,7 +137,11 @@ func TestWriteTagLib(t *testing.T) {
 	modifiedFile.SetYear(file.Year() + 1)
 	modifiedFile.SetArtist(getModifiedString(file.Artist()))
 	modifiedFile.SetTitle(getModifiedString(file.Title()))
-	modifiedFile.Save()
+	err = modifiedFile.Save()
+	if err != nil {
+		panic(err)
+		t.Fatalf("Cannot save file : %s", err)
+	}
 	modifiedFile.Close()
 	//Re-open the modified file
 	modifiedFile, err = Read(tempFileName)
