@@ -162,11 +162,14 @@ func init() {
 }
 
 // Saves the \a file to disk.
-func (file *File) Save() bool {
+func (file *File) Save() error {
+	var err error
 	glock.Lock()
 	defer glock.Unlock()
-	return C.taglib_file_save(file.fp) == 1
-
+	if C.taglib_file_save(file.fp) != 1 {
+		err = errors.New("Cannot save file")
+	}
+	return err
 }
 
 // Sets the tag's title.
