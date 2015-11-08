@@ -1,4 +1,8 @@
 // Go wrapper for taglib
+
+// Generate stringer method for types
+//go:generate stringer -type=TagName
+
 package taglib
 
 // #cgo LDFLAGS: -ltag_c
@@ -306,3 +310,4 @@ func (file *File) SetTrack(i int) {
 	ci := C.uint(i)
 	C.taglib_tag_set_track(file.tag, ci)
 }
+
