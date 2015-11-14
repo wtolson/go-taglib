@@ -5,9 +5,10 @@
 
 package taglib
 
+// #cgo pkg-config: taglib
 // #cgo LDFLAGS: -ltag_c
 // #include <stdlib.h>
-// #include <taglib/tag_c.h>
+// #include <tag_c.h>
 import "C"
 
 import (
