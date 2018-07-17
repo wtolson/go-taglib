@@ -24,22 +24,27 @@ type TagName int
 // Tag names
 const (
 	Album      TagName = iota
-	Artist     
-	Bitrate    
-	Channels   
-	Comments   
-	Genre      
-	Length     
-	Samplerate 
-	Title      
-	Track      
-	Year       
+	Artist
+	Bitrate
+	Channels
+	Comments
+	Genre
+	Length
+	Samplerate
+	Title
+	Track
+	Year
 )
 
 var (
 	ErrInvalid = errors.New("invalid file")
 	glock      = sync.Mutex{}
 )
+
+func init() {
+	// Make everything utf-8
+	C.taglib_id3v2_set_default_text_encoding(3)
+}
 
 // Returns a string with this tag's comment.
 func (file *File) Tag(tagname TagName) (tagvalue string) {
@@ -71,7 +76,7 @@ func (file *File) Tag(tagname TagName) (tagvalue string) {
 }
 
 // Sets the tag.
-func (file *File) SetTag(tagname TagName, tagvalue []byte) {
+func (file *File) SetTag(tagname TagName, tagvalue string) {
 	switch tagname {
 	case Album:
 		file.SetAlbum(tagvalue)
@@ -84,12 +89,12 @@ func (file *File) SetTag(tagname TagName, tagvalue []byte) {
 	case Title:
 		file.SetTitle(tagvalue)
 	case Track:
-		intValue, convErr := strconv.Atoi(string(tagvalue))
+		intValue, convErr := strconv.Atoi(tagvalue)
 		if convErr == nil {
 			file.SetTrack(intValue)
 		}
 	case Year:
-		intValue, convErr := strconv.Atoi(string(tagvalue))
+		intValue, convErr := strconv.Atoi(tagvalue)
 		if convErr == nil {
 			file.SetYear(intValue)
 		}
@@ -105,9 +110,6 @@ type File struct {
 // Reads and parses a music file. Returns an error if the provided filename is
 // not a valid file.
 func Read(filename string) (*File, error) {
-	// Make everything utf-8
-	C.taglib_id3v2_set_default_text_encoding(3)
-
 	glock.Lock()
 	defer glock.Unlock()
 
@@ -254,46 +256,47 @@ func (file *File) Save() error {
 }
 
 // Sets the tag's title.
-func (file *File) SetTitle(b []byte) {
+func (file *File) SetTitle(s string) {
 	glock.Lock()
 	defer glock.Unlock()
-	cs := GetCCharPointer(b)
+	cs := GetCCharPointer(s)
 	defer C.free(unsafe.Pointer(cs))
 	C.taglib_tag_set_title(file.tag, cs)
+
 }
 
 // Sets the tag's artist.
-func (file *File) SetArtist(b []byte) {
+func (file *File) SetArtist(s string) {
 	glock.Lock()
 	defer glock.Unlock()
-	cs := GetCCharPointer(b)
+	cs := GetCCharPointer(s)
 	defer C.free(unsafe.Pointer(cs))
 	C.taglib_tag_set_artist(file.tag, cs)
 }
 
 // Sets the tag's album.
-func (file *File) SetAlbum(b []byte) {
+func (file *File) SetAlbum(s string) {
 	glock.Lock()
 	defer glock.Unlock()
-	cs := GetCCharPointer(b)
+	cs := GetCCharPointer(s)
 	defer C.free(unsafe.Pointer(cs))
 	C.taglib_tag_set_album(file.tag, cs)
 }
 
 // Sets the tag's comment.
-func (file *File) SetComment(b []byte) {
+func (file *File) SetComment(s string) {
 	glock.Lock()
 	defer glock.Unlock()
-	cs := GetCCharPointer(b)
+	cs := GetCCharPointer(s)
 	defer C.free(unsafe.Pointer(cs))
 	C.taglib_tag_set_comment(file.tag, cs)
 }
 
 // Sets the tag's genre.
-func (file *File) SetGenre(b []byte) {
+func (file *File) SetGenre(s string) {
 	glock.Lock()
 	defer glock.Unlock()
-	cs := GetCCharPointer(b)
+	cs := GetCCharPointer(s)
 	defer C.free(unsafe.Pointer(cs))
 	C.taglib_tag_set_genre(file.tag, cs)
 }
@@ -314,8 +317,8 @@ func (file *File) SetTrack(i int) {
 	C.taglib_tag_set_track(file.tag, ci)
 }
 
-func GetCCharPointer(b []byte) *C.char {
+func GetCCharPointer(s string) *C.char {
 	// Add a 0x00 to end
-	b = append(b, 0)
+	b := append([]byte(s), 0)
 	return (*C.char)(C.CBytes(b))
 }
