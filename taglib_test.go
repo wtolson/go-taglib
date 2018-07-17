@@ -255,11 +255,11 @@ func TestGenericWriteTagLib(t *testing.T) {
 	}
 
 	if year := modifiedFile.Tag(Year); year != strconv.Itoa(getModifiedInt((1942))) {
-		t.Errorf("Got wrong modified year: %d", year)
+		t.Errorf("Got wrong modified year: %s", year)
 	}
 
 	if track := modifiedFile.Tag(Track); track != strconv.Itoa(getModifiedInt((42))) {
-		t.Errorf("Got wrong modified track: %d", track)
+		t.Errorf("Got wrong modified track: %s", track)
 	}
 }
 
