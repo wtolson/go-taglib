@@ -23,7 +23,7 @@ type TagName int
 
 // Tag names
 const (
-	Album TagName = iota
+	Album      TagName = iota
 	Artist
 	Bitrate
 	Channels
@@ -40,6 +40,11 @@ var (
 	ErrInvalid = errors.New("invalid file")
 	glock      = sync.Mutex{}
 )
+
+func init() {
+	// Make everything utf-8
+	C.taglib_id3v2_set_default_text_encoding(3)
+}
 
 // Returns a string with this tag's comment.
 func (file *File) Tag(tagname TagName) (tagvalue string) {
@@ -254,7 +259,7 @@ func (file *File) Save() error {
 func (file *File) SetTitle(s string) {
 	glock.Lock()
 	defer glock.Unlock()
-	cs := C.CString(s)
+	cs := GetCCharPointer(s)
 	defer C.free(unsafe.Pointer(cs))
 	C.taglib_tag_set_title(file.tag, cs)
 
@@ -264,7 +269,7 @@ func (file *File) SetTitle(s string) {
 func (file *File) SetArtist(s string) {
 	glock.Lock()
 	defer glock.Unlock()
-	cs := C.CString(s)
+	cs := GetCCharPointer(s)
 	defer C.free(unsafe.Pointer(cs))
 	C.taglib_tag_set_artist(file.tag, cs)
 }
@@ -273,7 +278,7 @@ func (file *File) SetArtist(s string) {
 func (file *File) SetAlbum(s string) {
 	glock.Lock()
 	defer glock.Unlock()
-	cs := C.CString(s)
+	cs := GetCCharPointer(s)
 	defer C.free(unsafe.Pointer(cs))
 	C.taglib_tag_set_album(file.tag, cs)
 }
@@ -282,7 +287,7 @@ func (file *File) SetAlbum(s string) {
 func (file *File) SetComment(s string) {
 	glock.Lock()
 	defer glock.Unlock()
-	cs := C.CString(s)
+	cs := GetCCharPointer(s)
 	defer C.free(unsafe.Pointer(cs))
 	C.taglib_tag_set_comment(file.tag, cs)
 }
@@ -291,7 +296,7 @@ func (file *File) SetComment(s string) {
 func (file *File) SetGenre(s string) {
 	glock.Lock()
 	defer glock.Unlock()
-	cs := C.CString(s)
+	cs := GetCCharPointer(s)
 	defer C.free(unsafe.Pointer(cs))
 	C.taglib_tag_set_genre(file.tag, cs)
 }
@@ -312,3 +317,8 @@ func (file *File) SetTrack(i int) {
 	C.taglib_tag_set_track(file.tag, ci)
 }
 
+func GetCCharPointer(s string) *C.char {
+	// Add a 0x00 to end
+	b := append([]byte(s), 0)
+	return (*C.char)(C.CBytes(b))
+}
